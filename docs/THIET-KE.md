@@ -6,11 +6,12 @@
 
 | Mục | Giá trị |
 |---|---|
-| **Tên dòng họ** | Nguyễn Bá |
+| **Tên dòng họ** | Nguyễn Bá — Trung Thành, Đại Lai, Gia Bình |
 | **Quê quán** | Xã Đại Lai, Thành phố Bắc Ninh |
 | **Số đời hiện tại** | Đời thứ 9 |
+| **Số thành viên (dữ liệu thật)** | **514 người** (296 nam, 218 nữ) |
 | **Ngôn ngữ** | Thuần tiếng Việt (không đa ngôn ngữ) |
-| **Nhập liệu ban đầu** | Có — nhập từ bản gia phả cũ, cấp qua **bảng dữ liệu SQL** |
+| **Nhập liệu ban đầu** | ✅ Đã trích xuất từ bản xuất NukeViet → `prisma/data-nguyen-ba.json` |
 | **Tin tức/sự kiện** | **Có** — trang tin tức, giỗ Tổ, họp họ |
 | **Triển khai** | **VPS chạy Ubuntu** |
 
@@ -49,57 +50,70 @@ Toàn bộ đều **mã nguồn mở, miễn phí**.
 
 ## 3. Mô hình dữ liệu
 
-### 3.1 Bảng `Person` (Thành viên)
+> **Cập nhật (2026-08-17):** Mô hình đã được **điều chỉnh theo dữ liệu thật**
+> trích xuất từ bản xuất NukeViet (`docs/bytec612_smartaudio-2.sql`) — **514
+> thành viên, 9 đời**. Các thay đổi chính so với thiết kế ban đầu:
+> 1. Lưu **cả cha (`parentId`) và mẹ (`motherId`)**, không chỉ cha.
+> 2. **Vợ/chồng là một bản ghi `Person`** (`quanHe = VO_CHONG`), không dùng bảng
+>    `Marriage` riêng — đúng cách NukeViet tổ chức.
+> 3. **Ngày sinh/mất/giỗ là chuỗi tự do** (âm lịch, khuyết, định dạng lẫn lộn) —
+>    **không** ép kiểu `DATE`.
+> 4. Nhiều **loại tên**: tên húy, tên tự, tên thụy, mã hiệu, chức vụ/phẩm hàm.
+> 5. `tinhTrang` = tình trạng **sống/mất** (khác với nháp/hiển thị).
 
-| Trường | Kiểu | Ghi chú |
+### 3.1 Bảng `Person` — ánh xạ từ NukeViet
+
+| Trường (mới) | Kiểu | Trường gốc NukeViet | Ghi chú |
+|---|---|---|---|
+| `id` | int (giữ id gốc) | `id` | Để ánh xạ cha/mẹ khi nhập liệu |
+| `gid` | int | `gid` | Thuộc dòng họ (genealogy) nào |
+| `parentId` | int? → Person | `parentid` | Cha (hoặc người phối ngẫu nếu `quanHe=VO_CHONG`) |
+| `motherId` | int? → Person | `parentid2` | Mẹ |
+| `thuTu` | int | `weight` | Con/vợ thứ mấy |
+| `doi` | int | `lev` | Đời thứ (1 = Thủy Tổ) |
+| `quanHe` | enum | `relationships` | `CON`(1) / `VO_CHONG`(2) / `KHAC`(3) |
+| `gioiTinh` | enum | `gender` | `NAM`(1) / `NU`(2) / `KHONG_RO`(0) |
+| `tinhTrang` | enum | `status` | `SONG`(1) / `MAT`(2) / `KHONG_RO`(0) |
+| `hoTen` | text | `full_name` | Tên húy (khai sinh / cúng cơm) |
+| `maHieu` | text? | `code` | Số mã hiệu trong gia phả |
+| `tenTu` | text? | `name1` | Tên tự |
+| `tenThuy` | text? | `name2` | Tên thụy / truy phong sau khi mất |
+| `tenKhac1/2` | text? | `name3`,`name4` | Tên khác |
+| `chucVu` | text? | `regency` | Chức vụ, phẩm hàm |
+| `alias` | text? | `alias` | |
+| `ngaySinh` | text? | `birthday` | Chuỗi tự do (âm/dương, có thể khuyết) |
+| `ngayMat` | text? | `dieday` | Chuỗi tự do |
+| `ngayGio` | text? | `anniversary` | Vd `"24/2"` |
+| `hienNgayGio` | bool | `actanniversary` | Có hiển thị ngày giỗ |
+| `huongTho` | int? | `life` | |
+| `moTang` | text? | `burial` | Nơi an táng |
+| `noiDung` | text? | `content` | Sự nghiệp, công đức, ghi chú |
+| `anh` | text? | `image` | Ảnh chân dung |
+| `hienThi` | bool | — | Ẩn/hiện công khai |
+| `createdAt`/`updatedAt` | timestamp | `add_time`/`edit_time` | |
+
+> **Cây gia phả**: con cháu (`quanHe=CON`) nối cha qua `parentId`, mẹ qua
+> `motherId`. Vợ/chồng (`quanHe=VO_CHONG`) nối người phối ngẫu qua `parentId`.
+> Truy vấn con của X = `parentId=X (hoặc motherId=X) AND quanHe=CON`.
+
+### 3.2 Bảng `Genealogy` (Dòng họ / phả hệ)
+
+Từ bảng gốc `giapha_vi_gia_pha_genealogy`.
+
+| Trường | Trường gốc | Ghi chú |
 |---|---|---|
-| `id` | UUID/serial | Khóa chính |
-| `hoTen` | text | Họ và tên đầy đủ |
-| `tenTu` | text? | Tên tự / tên hiệu |
-| `gioiTinh` | enum(nam/nữ) | |
-| `doi` | int | Thế hệ (đời 1 = Thủy Tổ) |
-| `thuTu` | int | Thứ tự con trong gia đình (anh cả = 1) |
-| `parentId` | FK → Person | Cha (sinh ra cây gia phả); null nếu là Thủy Tổ |
-| `laConNuoi` | bool | Phân biệt con đẻ / con nuôi |
-| `ngaySinh` | date? | Dương lịch |
-| `ngaySinhAm` | text? | Âm lịch (chuỗi: "12/3 Giáp Tý") |
-| `ngayMat` | date? | Dương lịch |
-| `ngayMatAm` | text? | Âm lịch |
-| `ngayGio` | text? | Ngày giỗ (âm lịch) |
-| `noiAnTang` | text? | Nơi an táng / vị trí mộ phần |
-| `queQuan` | text? | |
-| `noiOHienTai` | text? | Nơi ở hiện tại |
-| `ngheNghiep` | text? | |
-| `chucTuoc` | text? | Chức tước / học vị |
-| `tieuSu` | text? (dài) | Tiểu sử |
-| `congDuc` | text? (dài) | Công đức với dòng họ |
-| `avatarUrl` | text? | Ảnh đại diện |
-| `trangThai` | enum(hiển thị/nháp) | Duyệt nội dung |
-| `createdAt`/`updatedAt` | timestamp | |
+| `id` | `gid` | |
+| `tieuDe` | `title` | "Nguyễn Bá - Trung Thành, Đại Lai, Gia Bình" |
+| `tocUoc` | `rule` | Tộc ước / gia quy |
+| `noiDung`, `moTa` | `content`,`description` | |
+| `soThanhVien` | `number` | 514 |
+| `nam` | `years` | 2025 |
+| `tacGia`, `nguoiLienHe`, `dienThoai`, `email` | `author`,`full_name`,`telephone`,`email` | Thông tin liên hệ |
+| `hienThiVo` | `show_wife` | |
 
-> **Cây gia phả** được suy ra từ `parentId` (quan hệ cha → con). Đây là mô hình adjacency-list, đơn giản và đủ dùng.
-
-### 3.2 Bảng `Marriage` (Hôn nhân)
-
-| Trường | Kiểu | Ghi chú |
-|---|---|---|
-| `id` | UUID | |
-| `chongId` | FK → Person | |
-| `voId` | FK → Person | |
-| `thuTuHonNhan` | int | Đời vợ/chồng thứ mấy (hỗ trợ nhiều đời) |
-| `ghiChu` | text? | Con dâu/con rể, ghi chú khác |
-
-> Con của một cặp vẫn gắn qua `Person.parentId`. Người phối ngẫu (dâu/rể) là một `Person` nhưng thường **không có `parentId`** trong dòng họ (họ thuộc dòng khác) — đánh dấu bằng cờ hoặc để `parentId` null + liên kết qua `Marriage`.
-
-### 3.3 Bảng `Media` (Tư liệu)
-
-| Trường | Kiểu | Ghi chú |
-|---|---|---|
-| `id` | UUID | |
-| `personId` | FK → Person? | Gắn với 1 người (hoặc null = tư liệu chung) |
-| `loai` | enum | chân dung / mộ / scan gia phả / sắc phong / khác |
-| `url` | text | |
-| `moTa` | text? | |
+> **Đã lược bỏ** bảng `Marriage` và `Media` của thiết kế cũ (vợ/chồng nay là
+> `Person`; ảnh chân dung nằm ở `Person.anh`). Bảng `Location` (quê quán, từ
+> `giapha_vi_gia_pha_location`) sẽ bổ sung khi cần phân nhánh theo địa danh.
 
 ### 3.4 Bảng `User` (Tài khoản)
 
@@ -174,32 +188,36 @@ Hiển thị cây: **cả hai kiểu** — sơ đồ tương tác *và* danh sá
 
 ## 7. Lộ trình triển khai đề xuất
 
-1. **Giai đoạn 1 — Nền tảng:** khởi tạo Next.js + Prisma + PostgreSQL, schema DB (Person, Marriage, Media, User, TinTuc), **script import SQL** cho dữ liệu gia phả cũ, seed dữ liệu mẫu dòng họ Nguyễn Bá (9 đời).
-2. **Giai đoạn 2 — Xem công khai:** danh sách theo đời + trang chi tiết + tìm kiếm.
-3. **Giai đoạn 3 — Cây tương tác:** sơ đồ cây zoom/pan.
-4. **Giai đoạn 4 — Auth & Admin:** đăng nhập, phân quyền 3 cấp, form CRUD.
-5. **Giai đoạn 5 — Nâng cao:** lịch giỗ, tin tức/sự kiện, upload ảnh/tư liệu, duyệt nội dung.
-6. **Giai đoạn 6 — Triển khai VPS Ubuntu:** Docker Compose (app + PostgreSQL) + Nginx reverse proxy + hướng dẫn deploy chi tiết.
+1. **Giai đoạn 1 — Nền tảng:** ✅ *đã xong* — Next.js + Prisma + PostgreSQL, schema DB khớp dữ liệu thật (Person, Genealogy, User, TinTuc), **nạp 514 thành viên thật**, xác thực + phân quyền, các trang xem công khai.
+2. **Giai đoạn 2 — Hoàn thiện xem công khai:** tìm kiếm nâng cao, lọc theo đời/tình trạng, hiển thị vợ/chồng trong cây.
+3. **Giai đoạn 3 — Cây tương tác:** sơ đồ cây zoom/pan cho 514 node (ảo hoá phần hiển thị).
+4. **Giai đoạn 4 — Admin CRUD:** form thêm/sửa/xoá thành viên (chọn cha/mẹ, thứ tự), quản lý tin tức, tài khoản.
+5. **Giai đoạn 5 — Nâng cao:** lịch giỗ theo âm lịch, upload ảnh chân dung, tộc ước.
+6. **Giai đoạn 6 — Triển khai VPS Ubuntu:** ✅ *đã có bộ công cụ* — Docker Compose + Nginx + SSL (xem `docs/HD-TRIEN-KHAI.md`).
 
-### 7.1 Nhập dữ liệu gia phả cũ (SQL)
+### 7.1 Nhập dữ liệu thật (đã thực hiện)
 
-- Cung cấp **file `.sql`** khớp schema (`INSERT INTO "Person" (...)`, `Marriage`, ...).
-- Quan hệ cha–con qua `parentId`; import theo thứ tự đời (đời 1 trước) để khóa ngoại hợp lệ.
-- Kèm script kiểm tra tính toàn vẹn (mỗi người trừ Thủy Tổ đều có `parentId` hợp lệ; `doi` = `doi` của cha + 1).
+- Nguồn: bản xuất NukeViet `docs/bytec612_smartaudio-2.sql` (MySQL).
+- Đã trích xuất 4 bảng gia phả (`giapha_vi_gia_pha*`) → **`prisma/data-nguyen-ba.json`**
+  bằng script phân tích (giải mã enum, làm sạch ngày tháng, khử HTML entity).
+- `prisma/seed.ts` tự nạp file JSON này. Kiểm tra toàn vẹn đã đạt: **0 lỗi tham
+  chiếu cha/mẹ**, đúng 1 gốc (Thủy Tổ id=1), 9 đời.
+- Nạp **2 lượt** (chèn phẳng rồi cập nhật quan hệ) để an toàn khóa ngoại tự
+  tham chiếu vì có 67 trường hợp mẹ có `id` lớn hơn con.
 
 ---
 
 ## 8. Các quyết định đã chốt
 
-- [x] **Dòng họ:** Nguyễn Bá — Xã Đại Lai, TP. Bắc Ninh — hiện đến **đời thứ 9**.
-- [x] **Nhập liệu:** có, qua **bảng dữ liệu SQL** khớp schema.
+- [x] **Dòng họ:** Nguyễn Bá — Xã Đại Lai, TP. Bắc Ninh — **đời thứ 9, 514 người**.
+- [x] **Nhập liệu:** ✅ đã trích xuất & nạp dữ liệu thật từ bản xuất NukeViet.
 - [x] **Triển khai:** **VPS Ubuntu** (Docker Compose + Nginx).
 - [x] **Ngôn ngữ:** thuần tiếng Việt.
 - [x] **Tin tức/sự kiện:** có (giỗ Tổ, họp họ, thông báo).
 
 ## 9. Việc cần chuẩn bị (phía dòng họ)
 
-- Bản gia phả cũ (Excel/Word/PDF/ảnh scan) để tôi lập cấu trúc file SQL nhập liệu.
+- Ảnh chân dung các cụ (dữ liệu hiện chỉ 1/514 người có ảnh) — bổ sung dần qua Admin.
 - Thông tin VPS Ubuntu (khi tới bước deploy): domain, dung lượng, quyền SSH.
 - Ảnh Thủy Tổ + logo/hình ảnh dòng họ (nếu có) cho trang chủ.
 

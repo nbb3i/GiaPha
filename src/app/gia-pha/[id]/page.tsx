@@ -4,18 +4,21 @@ import { layChiTiet } from "@/lib/gia-pha";
 
 export const dynamic = "force-dynamic";
 
+const nhanTinhTrang: Record<string, string> = {
+  SONG: "Còn sống",
+  MAT: "Đã mất",
+  KHONG_RO: "Không rõ",
+};
+
 export default async function ChiTietThanhVien({
   params,
 }: {
   params: { id: string };
 }) {
-  const p = await layChiTiet(params.id).catch(() => null);
+  const id = Number(params.id);
+  if (!Number.isFinite(id)) notFound();
+  const p = await layChiTiet(id).catch(() => null);
   if (!p) notFound();
-
-  const voChong = [
-    ...p.honNhanChong.map((m) => m.vo),
-    ...p.honNhanVo.map((m) => m.chong),
-  ];
 
   return (
     <article className="mx-auto max-w-3xl space-y-8">
@@ -29,10 +32,10 @@ export default async function ChiTietThanhVien({
       {/* Đầu trang */}
       <header className="flex flex-col items-center gap-4 rounded-lg bg-white p-6 text-center shadow-sm sm:flex-row sm:text-left">
         <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-toc/10 text-3xl font-bold text-toc">
-          {p.avatarUrl ? (
+          {p.anh ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={p.avatarUrl}
+              src={p.anh}
               alt={p.hoTen}
               className="h-24 w-24 rounded-full object-cover"
             />
@@ -47,39 +50,43 @@ export default async function ChiTietThanhVien({
           {p.tenTu && <p className="text-gray-500">Tên tự: {p.tenTu}</p>}
           <p className="mt-1 text-sm text-dong">
             Đời thứ {p.doi}
-            {p.chucTuoc ? ` · ${p.chucTuoc}` : ""}
+            {p.gioiTinh !== "KHONG_RO"
+              ? ` · ${p.gioiTinh === "NAM" ? "Nam" : "Nữ"}`
+              : ""}
+            {p.chucVu ? ` · ${p.chucVu}` : ""}
           </p>
         </div>
       </header>
 
       {/* Thông tin */}
       <section className="grid gap-x-8 gap-y-3 rounded-lg bg-white p-6 shadow-sm sm:grid-cols-2">
-        <Truong nhan="Giới tính" gt={p.gioiTinh === "NAM" ? "Nam" : "Nữ"} />
-        <Truong nhan="Ngày sinh (ÂL)" gt={p.ngaySinhAm} />
-        <Truong nhan="Ngày mất (ÂL)" gt={p.ngayMatAm} />
+        <Truong nhan="Tình trạng" gt={nhanTinhTrang[p.tinhTrang]} />
+        <Truong nhan="Mã hiệu" gt={p.maHieu} />
+        <Truong nhan="Tên thụy/truy phong" gt={p.tenThuy} />
+        <Truong nhan="Ngày sinh" gt={p.ngaySinh} />
+        <Truong nhan="Ngày mất" gt={p.ngayMat} />
         <Truong nhan="Ngày giỗ" gt={p.ngayGio} />
-        <Truong nhan="Nơi an táng" gt={p.noiAnTang} />
-        <Truong nhan="Quê quán" gt={p.queQuan} />
-        <Truong nhan="Nơi ở" gt={p.noiOHienTai} />
-        <Truong nhan="Nghề nghiệp" gt={p.ngheNghiep} />
+        <Truong nhan="Hưởng thọ" gt={p.huongTho ? `${p.huongTho} tuổi` : null} />
+        <Truong nhan="Nơi an táng" gt={p.moTang} />
       </section>
 
-      {p.tieuSu && (
-        <Khoi tieuDe="Tiểu sử">
-          <p className="whitespace-pre-line leading-relaxed">{p.tieuSu}</p>
-        </Khoi>
-      )}
-      {p.congDuc && (
-        <Khoi tieuDe="Công đức với dòng họ">
-          <p className="whitespace-pre-line leading-relaxed">{p.congDuc}</p>
-        </Khoi>
+      {p.noiDung && (
+        <section className="rounded-lg bg-white p-6 shadow-sm">
+          <h2 className="mb-2 font-semibold text-dong">
+            Sự nghiệp · Công đức · Ghi chú
+          </h2>
+          <p className="whitespace-pre-line leading-relaxed text-gray-700">
+            {p.noiDung}
+          </p>
+        </section>
       )}
 
       {/* Quan hệ */}
-      <section className="grid gap-4 sm:grid-cols-3">
-        <QuanHe tieuDe="Cha" ds={p.parent ? [p.parent] : []} />
-        <QuanHe tieuDe="Vợ / Chồng" ds={voChong} khongLink />
-        <QuanHe tieuDe={`Con (${p.children.length})`} ds={p.children} />
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <QuanHe tieuDe="Cha" ds={p.cha ? [p.cha] : []} />
+        <QuanHe tieuDe="Mẹ" ds={p.me ? [p.me] : []} />
+        <QuanHe tieuDe="Vợ / Chồng" ds={p.voChong} />
+        <QuanHe tieuDe={`Con (${p.conTheoCha.length})`} ds={p.conTheoCha} />
       </section>
     </article>
   );
@@ -94,29 +101,12 @@ function Truong({ nhan, gt }: { nhan: string; gt?: string | null }) {
   );
 }
 
-function Khoi({
-  tieuDe,
-  children,
-}: {
-  tieuDe: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-lg bg-white p-6 shadow-sm">
-      <h2 className="mb-2 font-semibold text-dong">{tieuDe}</h2>
-      <div className="text-gray-700">{children}</div>
-    </section>
-  );
-}
-
 function QuanHe({
   tieuDe,
   ds,
-  khongLink,
 }: {
   tieuDe: string;
-  ds: { id: string; hoTen: string }[];
-  khongLink?: boolean;
+  ds: { id: number; hoTen: string }[];
 }) {
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
@@ -125,22 +115,16 @@ function QuanHe({
         <p className="text-xs text-gray-400">—</p>
       ) : (
         <ul className="space-y-1 text-sm">
-          {ds.map((n) =>
-            khongLink ? (
-              <li key={n.id} className="text-gray-700">
+          {ds.map((n) => (
+            <li key={n.id}>
+              <Link
+                href={`/gia-pha/${n.id}`}
+                className="text-toc hover:underline"
+              >
                 {n.hoTen}
-              </li>
-            ) : (
-              <li key={n.id}>
-                <Link
-                  href={`/gia-pha/${n.id}`}
-                  className="text-toc hover:underline"
-                >
-                  {n.hoTen}
-                </Link>
-              </li>
-            ),
-          )}
+              </Link>
+            </li>
+          ))}
         </ul>
       )}
     </div>

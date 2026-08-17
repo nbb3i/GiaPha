@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 async function layThongKe() {
   try {
     const [soThanhVien, soDoiRow, tinMoi] = await Promise.all([
-      prisma.person.count({ where: { laDauRe: false } }),
+      prisma.person.count({ where: { quanHe: "CON" } }),
       prisma.person.aggregate({ _max: { doi: true } }),
       prisma.tinTuc.findMany({
         where: { trangThai: "HIEN" },

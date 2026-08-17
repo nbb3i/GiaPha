@@ -8,10 +8,10 @@ export default function TheThanhVien({ p }: { p: Person }) {
       className="flex items-center gap-3 rounded border border-dong/20 bg-white p-3 transition hover:border-dong hover:shadow"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-toc/10 text-toc">
-        {p.avatarUrl ? (
+        {p.anh ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={p.avatarUrl}
+            src={p.anh}
             alt={p.hoTen}
             className="h-10 w-10 rounded-full object-cover"
           />
@@ -30,7 +30,7 @@ export default function TheThanhVien({ p }: { p: Person }) {
         </p>
         <p className="text-xs text-gray-500">
           Đời {p.doi}
-          {p.chucTuoc ? ` · ${p.chucTuoc}` : ""}
+          {p.chucVu ? ` · ${p.chucVu}` : ""}
           {p.ngayGio ? ` · Giỗ: ${p.ngayGio}` : ""}
         </p>
       </div>

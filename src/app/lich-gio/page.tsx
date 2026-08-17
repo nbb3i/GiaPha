@@ -7,9 +7,9 @@ export const metadata = { title: "Lịch giỗ" };
 export default async function TrangLichGio() {
   const ds = await prisma.person
     .findMany({
-      where: { ngayGio: { not: null }, laDauRe: false },
+      where: { ngayGio: { not: null }, hienThi: true },
       orderBy: [{ doi: "asc" }, { thuTu: "asc" }],
-      select: { id: true, hoTen: true, doi: true, ngayGio: true, chucTuoc: true },
+      select: { id: true, hoTen: true, doi: true, ngayGio: true, chucVu: true },
     })
     .catch(() => []);
 
@@ -47,8 +47,8 @@ export default async function TrangLichGio() {
                     >
                       {p.hoTen}
                     </Link>
-                    {p.chucTuoc ? (
-                      <span className="text-gray-400"> · {p.chucTuoc}</span>
+                    {p.chucVu ? (
+                      <span className="text-gray-400"> · {p.chucVu}</span>
                     ) : null}
                   </td>
                   <td className="px-4 py-2 text-gray-500">Đời {p.doi}</td>

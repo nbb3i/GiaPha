@@ -15,7 +15,8 @@ export default async function QuanLyThanhVien() {
   const ds = await prisma.person
     .findMany({
       orderBy: [{ doi: "asc" }, { thuTu: "asc" }],
-      select: { id: true, hoTen: true, doi: true, chucTuoc: true, trangThai: true },
+      take: 300,
+      select: { id: true, hoTen: true, doi: true, chucVu: true, hienThi: true },
     })
     .catch(() => []);
 
@@ -47,8 +48,8 @@ export default async function QuanLyThanhVien() {
             <tr>
               <th className="px-4 py-2">Họ tên</th>
               <th className="px-4 py-2">Đời</th>
-              <th className="px-4 py-2">Chức tước</th>
-              <th className="px-4 py-2">Trạng thái</th>
+              <th className="px-4 py-2">Chức vụ</th>
+              <th className="px-4 py-2">Hiển thị</th>
             </tr>
           </thead>
           <tbody>
@@ -63,16 +64,12 @@ export default async function QuanLyThanhVien() {
                   </Link>
                 </td>
                 <td className="px-4 py-2 text-gray-500">{p.doi}</td>
-                <td className="px-4 py-2 text-gray-500">{p.chucTuoc || "—"}</td>
+                <td className="px-4 py-2 text-gray-500">{p.chucVu || "—"}</td>
                 <td className="px-4 py-2">
                   <span
-                    className={
-                      p.trangThai === "HIEN"
-                        ? "text-green-600"
-                        : "text-amber-600"
-                    }
+                    className={p.hienThi ? "text-green-600" : "text-amber-600"}
                   >
-                    {p.trangThai === "HIEN" ? "Hiển thị" : "Nháp"}
+                    {p.hienThi ? "Hiển thị" : "Ẩn"}
                   </span>
                 </td>
               </tr>
