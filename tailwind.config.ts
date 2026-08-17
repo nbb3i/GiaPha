@@ -5,20 +5,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Tông màu truyền thống: đỏ đô + vàng đồng
-        toc: {
-          DEFAULT: "#7a1f1f",
-          light: "#9c2b2b",
-          dark: "#5c1616",
-        },
-        dong: {
-          DEFAULT: "#b8860b",
-          light: "#d4a017",
-        },
-        giay: "#faf6ee",
+        // Sơn son thếp vàng trên giấy dó
+        toc: { DEFAULT: "#7a1420", light: "#9c2b2b", dark: "#5c0f18" },
+        dong: { DEFAULT: "#a97b12", light: "#c9a24a" },
+        giay: { DEFAULT: "#f3ead4", "2": "#ece0c2", "3": "#e4d5b0" },
+        muc: { DEFAULT: "#2b2016", nhat: "#6f5c45" },
       },
       fontFamily: {
-        serif: ["Georgia", "Cambria", "Times New Roman", "serif"],
+        serif: ["Georgia", "Times New Roman", "Noto Serif", "serif"],
+        sans: ["system-ui", "Segoe UI", "Roboto", "sans-serif"],
       },
     },
   },

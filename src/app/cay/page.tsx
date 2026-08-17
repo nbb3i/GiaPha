@@ -25,7 +25,7 @@ export default async function TrangCay() {
       </h1>
 
       {roots.length === 0 ? (
-        <p className="text-sm text-gray-500">Chưa có dữ liệu.</p>
+        <p className="text-sm text-muc-nhat">Chưa có dữ liệu.</p>
       ) : (
         <CayTuongTac roots={roots} />
       )}

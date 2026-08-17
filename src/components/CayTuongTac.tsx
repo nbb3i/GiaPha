@@ -50,7 +50,7 @@ export default function CayTuongTac({ roots }: { roots: NodeMini[] }) {
       </div>
 
       <div
-        className="h-[70vh] cursor-grab overflow-hidden rounded-lg border border-dong/20 bg-white active:cursor-grabbing"
+        className="h-[70vh] cursor-grab overflow-hidden rounded-lg border border-dong/40 bg-giay-2 active:cursor-grabbing"
         onWheel={onWheel}
         onMouseDown={onDown}
         onMouseMove={onMove}
@@ -71,7 +71,7 @@ export default function CayTuongTac({ roots }: { roots: NodeMini[] }) {
           </ul>
         </div>
       </div>
-      <p className="mt-2 text-center text-xs text-gray-400">
+      <p className="mt-2 text-center text-xs text-muc-nhat">
         Cuộn chuột để phóng to/thu nhỏ · Kéo để di chuyển · Nhấp tên để xem chi tiết
       </p>
     </div>
@@ -101,14 +101,14 @@ function Nut2({ node }: { node: NodeMini }) {
       <span className="absolute left-0 top-4 h-px w-4 bg-dong/40" />
       <Link
         href={`/gia-pha/${node.id}`}
-        className={`inline-block rounded border px-3 py-1.5 text-sm transition hover:bg-white ${
+        className={`inline-block rounded border px-3 py-1.5 text-sm transition hover:bg-giay-2 ${
           node.gioiTinh === "NU"
             ? "border-rose-300 bg-rose-50 text-rose-800"
-            : "border-dong/30 bg-giay text-toc"
+            : "border-dong/40 bg-giay text-toc"
         }`}
       >
         {node.hoTen}
-        <span className="ml-1 text-xs text-gray-400">· đời {node.doi}</span>
+        <span className="ml-1 text-xs text-muc-nhat">· đời {node.doi}</span>
       </Link>
       {node.children.length > 0 && (
         <ul className="mt-2">

@@ -26,20 +26,20 @@ export default async function TrangTinTuc() {
       </h1>
 
       {ds.length === 0 ? (
-        <p className="text-sm text-gray-500">Chưa có bài viết.</p>
+        <p className="text-sm text-muc-nhat">Chưa có bài viết.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {ds.map((t) => (
             <Link
               key={t.id}
               href={`/tin-tuc/${t.slug}`}
-              className="rounded-lg border border-dong/20 bg-white p-5 transition hover:border-dong hover:shadow"
+              className="rounded-lg border border-dong/40 bg-giay-2 p-5 transition hover:border-dong hover:shadow"
             >
               <span className="text-xs font-medium uppercase text-dong">
                 {nhanLoai[t.loai] || t.loai}
               </span>
               <h2 className="mt-1 font-semibold text-toc">{t.tieuDe}</h2>
-              <p className="mt-2 line-clamp-2 text-sm text-gray-500">
+              <p className="mt-2 line-clamp-2 text-sm text-muc-nhat">
                 {t.noiDung}
               </p>
             </Link>

@@ -5,9 +5,9 @@ export default function TheThanhVien({ p }: { p: Person }) {
   return (
     <Link
       href={`/gia-pha/${p.id}`}
-      className="flex items-center gap-3 rounded border border-dong/20 bg-white p-3 transition hover:border-dong hover:shadow"
+      className="flex items-center gap-3 rounded-sm border border-dong/40 bg-giay-2 p-3 transition hover:border-dong hover:shadow"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-toc/10 text-toc">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-dong/50 bg-giay-3 font-serif text-toc">
         {p.anh ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -22,13 +22,13 @@ export default function TheThanhVien({ p }: { p: Person }) {
         )}
       </div>
       <div className="min-w-0">
-        <p className="truncate font-medium text-toc">
+        <p className="truncate font-serif font-medium text-toc">
           {p.hoTen}
           {p.tenTu ? (
-            <span className="text-gray-400"> ({p.tenTu})</span>
+            <span className="text-muc-nhat"> ({p.tenTu})</span>
           ) : null}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="font-sans text-xs text-muc-nhat">
           Đời {p.doi}
           {p.chucVu ? ` · ${p.chucVu}` : ""}
           {p.ngayGio ? ` · Giỗ: ${p.ngayGio}` : ""}

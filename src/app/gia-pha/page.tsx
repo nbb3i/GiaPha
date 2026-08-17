@@ -31,7 +31,7 @@ export default async function TrangGiaPha({
             name="q"
             defaultValue={searchParams.q || ""}
             placeholder="Tìm theo tên…"
-            className="rounded border border-dong/30 px-3 py-1.5 text-sm focus:border-dong focus:outline-none"
+            className="rounded border border-dong/40 px-3 py-1.5 text-sm focus:border-dong focus:outline-none"
           />
           <button className="rounded bg-toc px-4 py-1.5 text-sm text-giay hover:bg-toc-light">
             Tìm
@@ -40,15 +40,15 @@ export default async function TrangGiaPha({
       </div>
 
       {theoDoi.length === 0 ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muc-nhat">
           Không có dữ liệu{q ? " phù hợp" : ""}.
         </p>
       ) : (
         theoDoi.map(([doi, ds]) => (
           <section key={doi}>
-            <h2 className="mb-3 border-b border-dong/30 pb-1 text-lg font-semibold text-dong">
+            <h2 className="mb-3 border-b border-dong/40 pb-1 text-lg font-semibold text-dong">
               Đời thứ {doi}{" "}
-              <span className="text-sm font-normal text-gray-400">
+              <span className="text-sm font-normal text-muc-nhat">
                 ({ds.length} người)
               </span>
             </h2>

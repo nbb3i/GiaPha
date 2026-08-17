@@ -20,62 +20,96 @@ export default async function ChiTietThanhVien({
   const p = await layChiTiet(id).catch(() => null);
   if (!p) notFound();
 
+  const chuCai = p.hoTen.trim().split(" ").pop()?.charAt(0) ?? "?";
+
   return (
     <article className="mx-auto max-w-3xl space-y-8">
-      <nav className="text-sm text-gray-500">
-        <Link href="/gia-pha" className="hover:text-toc">
+      <nav className="font-sans text-sm text-muc-nhat">
+        <Link href="/gia-pha" className="text-toc hover:underline">
           Gia phả
         </Link>{" "}
-        / <span className="text-toc">{p.hoTen}</span>
+        / <span>Đời thứ {p.doi}</span> /{" "}
+        <span className="text-muc">{p.hoTen}</span>
       </nav>
 
-      {/* Đầu trang */}
-      <header className="flex flex-col items-center gap-4 rounded-lg bg-white p-6 text-center shadow-sm sm:flex-row sm:text-left">
-        <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-toc/10 text-3xl font-bold text-toc">
-          {p.anh ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={p.anh}
-              alt={p.hoTen}
-              className="h-24 w-24 rounded-full object-cover"
-            />
-          ) : (
-            p.hoTen.trim().split(" ").pop()?.charAt(0)
-          )}
+      {/* Hồ sơ */}
+      <header className="khung relative grid grid-cols-1 gap-6 bg-giay-2 p-6 sm:grid-cols-[200px_1fr] sm:p-8">
+        <span className="goc goc-tl" />
+        <span className="goc goc-tr" />
+        <span className="goc goc-bl" />
+        <span className="goc goc-br" />
+
+        {/* Chân dung */}
+        <div className="mx-auto aspect-[3/4] w-44 sm:mx-0 sm:w-full">
+          <div className="khung flex h-full flex-col items-center justify-center gap-2 bg-giay-3 text-muc-nhat">
+            {p.anh ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={p.anh}
+                alt={p.hoTen}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <>
+                <span className="grid h-16 w-16 place-items-center rounded-full border-2 border-dong text-2xl text-toc">
+                  {chuCai}
+                </span>
+                <span className="font-sans text-xs tracking-wide">
+                  Chưa có ảnh
+                </span>
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Tên + huy hiệu */}
         <div>
-          <h1 className="tieu-de-trang text-2xl font-bold text-toc">
+          <span className="eyebrow">
+            {p.chucVu || (p.doi === 1 ? "Thủy Tổ" : "Thành viên")} · Đời thứ{" "}
+            {p.doi}
+          </span>
+          <h1 className="tieu-de-trang mt-1 text-3xl font-bold text-toc">
             {p.hoTen}
           </h1>
-          {p.tenTu && <p className="text-gray-500">Tên tự: {p.tenTu}</p>}
-          <p className="mt-1 text-sm text-dong">
-            Đời thứ {p.doi}
-            {p.gioiTinh !== "KHONG_RO"
-              ? ` · ${p.gioiTinh === "NAM" ? "Nam" : "Nữ"}`
-              : ""}
-            {p.chucVu ? ` · ${p.chucVu}` : ""}
-          </p>
+          {p.tenTu && (
+            <p className="mt-1 font-sans text-sm text-muc-nhat">
+              Tên tự: {p.tenTu}
+            </p>
+          )}
+          {p.tenThuy && (
+            <p className="font-sans text-sm text-muc-nhat">
+              Tên thụy: {p.tenThuy}
+            </p>
+          )}
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {p.gioiTinh !== "KHONG_RO" && (
+              <Badge son>{p.gioiTinh === "NAM" ? "Nam" : "Nữ"}</Badge>
+            )}
+            <Badge>{nhanTinhTrang[p.tinhTrang]}</Badge>
+            {p.ngayGio && <Badge>Giỗ: {p.ngayGio}</Badge>}
+          </div>
+
+          {/* Thông tin có chấm nối */}
+          <dl className="mt-5 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+            <Hang nhan="Đời" gt={`Thứ ${p.doi}`} />
+            <Hang nhan="Mã hiệu" gt={p.maHieu} />
+            <Hang nhan="Ngày sinh" gt={p.ngaySinh} />
+            <Hang nhan="Ngày mất" gt={p.ngayMat} />
+            <Hang nhan="Hưởng thọ" gt={p.huongTho ? `${p.huongTho} tuổi` : null} />
+            <Hang nhan="Nơi an táng" gt={p.moTang} />
+          </dl>
         </div>
       </header>
 
-      {/* Thông tin */}
-      <section className="grid gap-x-8 gap-y-3 rounded-lg bg-white p-6 shadow-sm sm:grid-cols-2">
-        <Truong nhan="Tình trạng" gt={nhanTinhTrang[p.tinhTrang]} />
-        <Truong nhan="Mã hiệu" gt={p.maHieu} />
-        <Truong nhan="Tên thụy/truy phong" gt={p.tenThuy} />
-        <Truong nhan="Ngày sinh" gt={p.ngaySinh} />
-        <Truong nhan="Ngày mất" gt={p.ngayMat} />
-        <Truong nhan="Ngày giỗ" gt={p.ngayGio} />
-        <Truong nhan="Hưởng thọ" gt={p.huongTho ? `${p.huongTho} tuổi` : null} />
-        <Truong nhan="Nơi an táng" gt={p.moTang} />
-      </section>
-
       {p.noiDung && (
-        <section className="rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="mb-2 font-semibold text-dong">
-            Sự nghiệp · Công đức · Ghi chú
-          </h2>
-          <p className="whitespace-pre-line leading-relaxed text-gray-700">
+        <section className="khung relative bg-giay-2 p-6 sm:p-8">
+          <span className="goc goc-tl" />
+          <span className="goc goc-tr" />
+          <span className="goc goc-bl" />
+          <span className="goc goc-br" />
+          <h2 className="eyebrow mb-3">Sự nghiệp · Công đức</h2>
+          <p className="whitespace-pre-line font-serif text-lg leading-relaxed text-muc">
             {p.noiDung}
           </p>
         </section>
@@ -92,11 +126,32 @@ export default async function ChiTietThanhVien({
   );
 }
 
-function Truong({ nhan, gt }: { nhan: string; gt?: string | null }) {
+function Badge({
+  children,
+  son,
+}: {
+  children: React.ReactNode;
+  son?: boolean;
+}) {
   return (
-    <div className="flex justify-between border-b border-gray-100 py-1 text-sm">
-      <span className="text-gray-400">{nhan}</span>
-      <span className="font-medium text-gray-700">{gt || "—"}</span>
+    <span
+      className={`rounded-full border px-3 py-1 font-sans text-xs tracking-wide ${
+        son
+          ? "border-toc bg-toc text-giay"
+          : "border-dong/40 bg-giay text-muc"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Hang({ nhan, gt }: { nhan: string; gt?: string | null }) {
+  return (
+    <div className="hang-cham border-b border-dotted border-dong/40">
+      <dt className="font-sans text-[0.78rem] text-muc-nhat">{nhan}</dt>
+      <i className="dots" />
+      <dd className="text-right text-sm text-muc">{gt || "—"}</dd>
     </div>
   );
 }
@@ -109,17 +164,19 @@ function QuanHe({
   ds: { id: number; hoTen: string }[];
 }) {
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h3 className="mb-2 text-sm font-semibold text-toc">{tieuDe}</h3>
+    <div className="border border-dong/40 bg-giay-2 p-4">
+      <h3 className="mb-2 font-sans text-[0.72rem] uppercase tracking-[0.16em] text-dong">
+        {tieuDe}
+      </h3>
       {ds.length === 0 ? (
-        <p className="text-xs text-gray-400">—</p>
+        <p className="text-xs text-muc-nhat">—</p>
       ) : (
-        <ul className="space-y-1 text-sm">
+        <ul className="space-y-1">
           {ds.map((n) => (
             <li key={n.id}>
               <Link
                 href={`/gia-pha/${n.id}`}
-                className="text-toc hover:underline"
+                className="font-serif text-toc hover:underline"
               >
                 {n.hoTen}
               </Link>

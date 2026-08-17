@@ -18,14 +18,14 @@ export default async function TrangLichGio() {
       <h1 className="tieu-de-trang text-2xl font-bold text-toc">
         Lịch giỗ dòng họ
       </h1>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muc-nhat">
         Danh sách ngày giỗ (âm lịch) của các bậc tiền nhân — để con cháu ghi nhớ.
       </p>
 
       {ds.length === 0 ? (
-        <p className="text-sm text-gray-500">Chưa có thông tin ngày giỗ.</p>
+        <p className="text-sm text-muc-nhat">Chưa có thông tin ngày giỗ.</p>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-dong/20 bg-white">
+        <div className="overflow-hidden rounded-lg border border-dong/40 bg-giay-2">
           <table className="w-full text-left text-sm">
             <thead className="bg-toc text-giay">
               <tr>
@@ -48,10 +48,10 @@ export default async function TrangLichGio() {
                       {p.hoTen}
                     </Link>
                     {p.chucVu ? (
-                      <span className="text-gray-400"> · {p.chucVu}</span>
+                      <span className="text-muc-nhat"> · {p.chucVu}</span>
                     ) : null}
                   </td>
-                  <td className="px-4 py-2 text-gray-500">Đời {p.doi}</td>
+                  <td className="px-4 py-2 text-muc-nhat">Đời {p.doi}</td>
                 </tr>
               ))}
             </tbody>
