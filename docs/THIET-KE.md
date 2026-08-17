@@ -2,6 +2,20 @@
 
 > Bản thảo brainstorm · Cập nhật: 2026-08-17
 
+## 0. Thông tin dòng họ (đã chốt)
+
+| Mục | Giá trị |
+|---|---|
+| **Tên dòng họ** | Nguyễn Bá |
+| **Quê quán** | Xã Đại Lai, Thành phố Bắc Ninh |
+| **Số đời hiện tại** | Đời thứ 9 |
+| **Ngôn ngữ** | Thuần tiếng Việt (không đa ngôn ngữ) |
+| **Nhập liệu ban đầu** | Có — nhập từ bản gia phả cũ, cấp qua **bảng dữ liệu SQL** |
+| **Tin tức/sự kiện** | **Có** — trang tin tức, giỗ Tổ, họp họ |
+| **Triển khai** | **VPS chạy Ubuntu** |
+
+---
+
 ## 1. Mục tiêu
 
 Xây dựng website giúp:
@@ -26,8 +40,8 @@ Tham khảo:
 | Database | **PostgreSQL** | Quan hệ cha–con, hôn nhân nhiều đời rất hợp mô hình quan hệ |
 | ORM | **Prisma** | Type-safe, migration rõ ràng |
 | Xác thực | **NextAuth (Auth.js)** | Đăng nhập + phiên + vai trò |
-| Lưu ảnh | File trên đĩa/VPS + đường dẫn trong DB (hoặc S3-compatible) | Avatar, ảnh mộ, tư liệu scan |
-| Triển khai | Vercel **hoặc** VPS Việt Nam (Docker) | Linh hoạt theo hosting sẵn có |
+| Lưu ảnh | File trên đĩa VPS + đường dẫn trong DB | Avatar, ảnh mộ, tư liệu scan |
+| Triển khai | **VPS Ubuntu** — Docker Compose (app + PostgreSQL) sau Nginx reverse proxy | Chủ động, đặt tại VN |
 
 Toàn bộ đều **mã nguồn mở, miễn phí**.
 
@@ -97,6 +111,21 @@ Toàn bộ đều **mã nguồn mở, miễn phí**.
 | `vaiTro` | enum(**KHACH** / **BIENTAP** / **ADMIN**) | Phân quyền |
 | `hoTen` | text? | |
 
+### 3.5 Bảng `TinTuc` (Tin tức / Sự kiện dòng họ)
+
+| Trường | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | UUID | |
+| `tieuDe` | text | |
+| `slug` | text unique | Đường dẫn thân thiện |
+| `noiDung` | text (dài) | Nội dung bài viết |
+| `anhBia` | text? | Ảnh đại diện |
+| `loai` | enum | tin-tuc / gio-to / hop-ho / thong-bao |
+| `ngayDienRa` | date? | Ngày diễn ra sự kiện (giỗ Tổ, họp họ) |
+| `tacGiaId` | FK → User | Người đăng |
+| `trangThai` | enum(hiển thị/nháp) | |
+| `createdAt` | timestamp | |
+
 ---
 
 ## 4. Phân quyền (3 cấp)
@@ -124,6 +153,7 @@ Toàn bộ đều **mã nguồn mở, miễn phí**.
 | **Chi tiết thành viên** | Đầy đủ tiểu sử, ảnh, ngày giỗ, liên kết cha/con/vợ-chồng |
 | **Tìm kiếm** | Theo tên, lọc theo đời |
 | **Lịch giỗ** | Danh sách ngày giỗ trong năm (âm lịch) — nhắc con cháu |
+| **Tin tức / Sự kiện** | Danh sách + chi tiết bài viết: tin dòng họ, giỗ Tổ, họp họ, thông báo |
 
 Hiển thị cây: **cả hai kiểu** — sơ đồ tương tác *và* danh sách theo đời, người dùng tự chọn.
 
@@ -136,6 +166,7 @@ Hiển thị cây: **cả hai kiểu** — sơ đồ tương tác *và* danh sá
 - Quản lý thành viên: form thêm/sửa, chọn cha, sắp thứ tự con, upload ảnh.
 - Quản lý hôn nhân: gắn vợ/chồng.
 - Quản lý tư liệu/ảnh.
+- Quản lý tin tức / sự kiện dòng họ.
 - (Admin) Quản lý tài khoản & phân quyền.
 - (Admin) Duyệt nội dung nháp.
 
@@ -143,22 +174,34 @@ Hiển thị cây: **cả hai kiểu** — sơ đồ tương tác *và* danh sá
 
 ## 7. Lộ trình triển khai đề xuất
 
-1. **Giai đoạn 1 — Nền tảng:** khởi tạo Next.js + Prisma + PostgreSQL, schema DB, seed dữ liệu mẫu.
+1. **Giai đoạn 1 — Nền tảng:** khởi tạo Next.js + Prisma + PostgreSQL, schema DB (Person, Marriage, Media, User, TinTuc), **script import SQL** cho dữ liệu gia phả cũ, seed dữ liệu mẫu dòng họ Nguyễn Bá (9 đời).
 2. **Giai đoạn 2 — Xem công khai:** danh sách theo đời + trang chi tiết + tìm kiếm.
 3. **Giai đoạn 3 — Cây tương tác:** sơ đồ cây zoom/pan.
 4. **Giai đoạn 4 — Auth & Admin:** đăng nhập, phân quyền 3 cấp, form CRUD.
-5. **Giai đoạn 5 — Nâng cao:** lịch giỗ, upload ảnh/tư liệu, duyệt nội dung.
-6. **Giai đoạn 6 — Triển khai:** Docker + hướng dẫn deploy.
+5. **Giai đoạn 5 — Nâng cao:** lịch giỗ, tin tức/sự kiện, upload ảnh/tư liệu, duyệt nội dung.
+6. **Giai đoạn 6 — Triển khai VPS Ubuntu:** Docker Compose (app + PostgreSQL) + Nginx reverse proxy + hướng dẫn deploy chi tiết.
+
+### 7.1 Nhập dữ liệu gia phả cũ (SQL)
+
+- Cung cấp **file `.sql`** khớp schema (`INSERT INTO "Person" (...)`, `Marriage`, ...).
+- Quan hệ cha–con qua `parentId`; import theo thứ tự đời (đời 1 trước) để khóa ngoại hợp lệ.
+- Kèm script kiểm tra tính toàn vẹn (mỗi người trừ Thủy Tổ đều có `parentId` hợp lệ; `doi` = `doi` của cha + 1).
 
 ---
 
-## 8. Câu hỏi còn mở (cần chốt trước khi code)
+## 8. Các quyết định đã chốt
 
-- [ ] Tên dòng họ cụ thể + có bao nhiêu đời hiện tại (để chuẩn bị dữ liệu)?
-- [ ] Có cần **nhập sẵn dữ liệu** từ bản gia phả cũ (Excel/Word/PDF) không?
-- [ ] Triển khai lên **Vercel** hay **VPS Việt Nam**?
-- [ ] Có cần đa ngôn ngữ (Việt/Anh) cho con cháu ở nước ngoài không?
-- [ ] Có cần trang **tin tức/sự kiện dòng họ** (giỗ Tổ, họp họ) không?
+- [x] **Dòng họ:** Nguyễn Bá — Xã Đại Lai, TP. Bắc Ninh — hiện đến **đời thứ 9**.
+- [x] **Nhập liệu:** có, qua **bảng dữ liệu SQL** khớp schema.
+- [x] **Triển khai:** **VPS Ubuntu** (Docker Compose + Nginx).
+- [x] **Ngôn ngữ:** thuần tiếng Việt.
+- [x] **Tin tức/sự kiện:** có (giỗ Tổ, họp họ, thông báo).
+
+## 9. Việc cần chuẩn bị (phía dòng họ)
+
+- Bản gia phả cũ (Excel/Word/PDF/ảnh scan) để tôi lập cấu trúc file SQL nhập liệu.
+- Thông tin VPS Ubuntu (khi tới bước deploy): domain, dung lượng, quyền SSH.
+- Ảnh Thủy Tổ + logo/hình ảnh dòng họ (nếu có) cho trang chủ.
 
 ---
 
