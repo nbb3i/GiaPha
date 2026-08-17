@@ -1,4 +1,5 @@
 import { layTatCaThanhVien, nhomTheoDoi } from "@/lib/gia-pha";
+import { boDau } from "@/lib/vi";
 import TheThanhVien from "@/components/TheThanhVien";
 
 export const dynamic = "force-dynamic";
@@ -9,13 +10,14 @@ export default async function TrangGiaPha({
 }: {
   searchParams: { q?: string };
 }) {
-  const q = (searchParams.q || "").trim().toLowerCase();
+  const q = boDau(searchParams.q || "");
   let list = await layTatCaThanhVien().catch(() => []);
   if (q) {
-    list = list.filter(
-      (p) =>
-        p.hoTen.toLowerCase().includes(q) ||
-        (p.tenTu || "").toLowerCase().includes(q),
+    // Tìm không phân biệt dấu, trên nhiều loại tên
+    list = list.filter((p) =>
+      [p.hoTen, p.tenTu, p.tenThuy, p.chucVu, p.maHieu]
+        .map((x) => boDau(x || ""))
+        .some((x) => x.includes(q)),
     );
   }
   const theoDoi = nhomTheoDoi(list);

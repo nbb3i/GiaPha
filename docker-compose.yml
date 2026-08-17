@@ -1,11 +1,14 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:16
     restart: unless-stopped
     environment:
       POSTGRES_USER: giapha
       POSTGRES_PASSWORD: giapha_password
       POSTGRES_DB: giapha
+      # Ép UTF-8 để lưu tiếng Việt có dấu chuẩn (chỉ áp dụng khi khởi tạo DB mới)
+      LANG: C.UTF-8
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C.UTF-8"
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:

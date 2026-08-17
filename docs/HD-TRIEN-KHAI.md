@@ -155,3 +155,54 @@ Chi tiết quy tắc nhập (thứ tự đời, kiểm tra toàn vẹn): xem `pr
 | Cổng 3000 bị chiếm | Đổi ánh xạ cổng trong `docker-compose.yml` (vd `3001:3000`) |
 
 Khi gặp lỗi, **dán output** của `docker compose logs app` để được hỗ trợ chính xác.
+
+---
+
+## 9. Tiếng Việt & mã hoá UTF-8
+
+Website lưu tiếng Việt có dấu, nên cơ sở dữ liệu phải dùng **UTF-8**.
+`docker-compose.yml` đã cấu hình sẵn (`--encoding=UTF8`, image `postgres:16`).
+Cấu hình này **chỉ áp dụng khi khởi tạo DB lần đầu** (volume rỗng).
+
+### Kiểm tra mã hoá DB hiện tại
+```bash
+docker compose exec -T db psql -U giapha -d giapha -c "SHOW SERVER_ENCODING;"
+```
+- Trả về **`UTF8`** → tốt, không cần làm gì thêm.
+- Trả về `SQL_ASCII` → nên chuyển sang UTF-8 theo một trong hai cách dưới.
+
+### Cách A — Tạo lại DB mới (nếu CHƯA nhập liệu thủ công đáng kể)
+> Xoá sạch DB rồi nạp lại 514 thành viên từ dữ liệu gốc.
+```bash
+docker compose down
+docker volume rm giapha_pgdata     # tên volume: <thư-mục>_pgdata
+git pull && ./deploy.sh            # tạo DB UTF8 + nạp lại dữ liệu
+```
+
+### Cách B — Giữ nguyên dữ liệu đã có (sao lưu → tạo lại → phục hồi)
+```bash
+# 1) Sao lưu dữ liệu hiện tại
+docker compose exec -T db pg_dump -U giapha giapha > backup.sql
+# 2) Xoá volume cũ, tạo DB mới UTF8 (rỗng)
+docker compose down
+docker volume rm giapha_pgdata
+docker compose up -d db
+sleep 8
+# 3) Phục hồi dữ liệu
+cat backup.sql | docker compose exec -T db psql -U giapha giapha
+# 4) Bật lại toàn bộ
+docker compose up -d
+```
+
+> **Lưu ý:** SQL_ASCII vẫn lưu đúng byte UTF-8 nên tên có dấu thường vẫn hiển thị
+> bình thường. Việc chuyển UTF8 là để chuẩn hoá (đúng `ILIKE`, `length()`, sắp
+> xếp, kiểm tra hợp lệ). Không gấp nếu tên đang hiển thị đúng.
+
+### Tìm kiếm không dấu
+Trang **Gia phả** hỗ trợ tìm không phân biệt dấu: gõ `nguyen ba binh` vẫn ra
+"Nguyễn Bá Bình" (xử lý ở tầng ứng dụng qua hàm `boDau`, không phụ thuộc DB).
+
+### (Tuỳ chọn) Sắp xếp tên theo đúng tiếng Việt
+Danh sách hiện sắp theo **đời** và **thứ tự** (số) nên không cần collation đặc
+biệt. Nếu sau này cần sắp danh sách **theo vần tiếng Việt**, dùng ICU collation
+của PostgreSQL 16: `ORDER BY "hoTen" COLLATE "vi-x-icu"`.

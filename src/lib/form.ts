@@ -1,4 +1,5 @@
 /** Tiện ích đọc FormData an toàn cho Server Actions. */
+import { boDau } from "@/lib/vi";
 
 export function chuoi(fd: FormData, key: string): string | null {
   const v = fd.get(key);
@@ -21,15 +22,10 @@ export function coCheck(fd: FormData, key: string): boolean {
 
 /** Chuyển tiếng Việt có dấu -> slug ascii. */
 export function taoSlug(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-    .toLowerCase()
+  return boDau(s)
     .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
     .slice(0, 120);
 }
