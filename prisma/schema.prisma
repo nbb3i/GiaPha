@@ -1,0 +1,157 @@
+// Prisma schema — Gia phả dòng họ Nguyễn Bá
+// Tài liệu thiết kế: docs/THIET-KE.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GioiTinh {
+  NAM
+  NU
+}
+
+enum VaiTro {
+  KHACH
+  BIENTAP
+  ADMIN
+}
+
+enum TrangThai {
+  NHAP // nháp, chờ duyệt
+  HIEN // hiển thị công khai
+}
+
+enum LoaiMedia {
+  CHAN_DUNG
+  MO
+  SCAN_GIA_PHA
+  SAC_PHONG
+  KHAC
+}
+
+enum LoaiTin {
+  TIN_TUC
+  GIO_TO
+  HOP_HO
+  THONG_BAO
+}
+
+/// Thành viên trong gia phả
+model Person {
+  id        String   @id @default(cuid())
+  hoTen     String
+  tenTu     String? // tên tự / tên hiệu
+  gioiTinh  GioiTinh @default(NAM)
+  doi       Int // thế hệ: đời 1 = Thủy Tổ
+  thuTu     Int      @default(1) // thứ tự con trong gia đình
+
+  // Quan hệ cha -> con (sinh ra cây gia phả)
+  parentId String?
+  parent   Person?  @relation("QuanHeChaCon", fields: [parentId], references: [id], onDelete: SetNull)
+  children Person[] @relation("QuanHeChaCon")
+
+  laConNuoi Boolean @default(false)
+  // Người phối ngẫu từ dòng khác (dâu/rể) -> không nằm trong cây huyết thống
+  laDauRe   Boolean @default(false)
+
+  // Sinh - tử
+  ngaySinh    DateTime?
+  ngaySinhAm  String? // âm lịch, dạng chuỗi
+  ngayMat     DateTime?
+  ngayMatAm   String?
+  ngayGio     String? // ngày giỗ (âm lịch)
+  noiAnTang   String?
+
+  // Thân thế
+  queQuan    String?
+  noiOHienTai String?
+  ngheNghiep String?
+  chucTuoc   String?
+  tieuSu     String? @db.Text
+  congDuc    String? @db.Text
+
+  avatarUrl String?
+  trangThai TrangThai @default(HIEN)
+
+  // Hôn nhân
+  honNhanChong Marriage[] @relation("VaiChong")
+  honNhanVo    Marriage[] @relation("VaiVo")
+
+  media Media[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+  @@index([doi])
+}
+
+/// Quan hệ hôn nhân (hỗ trợ nhiều đời vợ/chồng)
+model Marriage {
+  id     String @id @default(cuid())
+  chongId String
+  chong   Person @relation("VaiChong", fields: [chongId], references: [id], onDelete: Cascade)
+  voId    String
+  vo      Person @relation("VaiVo", fields: [voId], references: [id], onDelete: Cascade)
+
+  thuTuHonNhan Int     @default(1) // vợ/chồng thứ mấy
+  ghiChu       String?
+
+  createdAt DateTime @default(now())
+
+  @@index([chongId])
+  @@index([voId])
+}
+
+/// Tư liệu, ảnh
+model Media {
+  id       String    @id @default(cuid())
+  personId String?
+  person   Person?   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  loai     LoaiMedia @default(KHAC)
+  url      String
+  moTa     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([personId])
+}
+
+/// Tài khoản người dùng
+model User {
+  id           String  @id @default(cuid())
+  username     String  @unique
+  email        String? @unique
+  passwordHash String
+  hoTen        String?
+  vaiTro       VaiTro  @default(KHACH)
+
+  tinTuc TinTuc[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Tin tức / sự kiện dòng họ
+model TinTuc {
+  id         String    @id @default(cuid())
+  tieuDe     String
+  slug       String    @unique
+  noiDung    String    @db.Text
+  anhBia     String?
+  loai       LoaiTin   @default(TIN_TUC)
+  ngayDienRa DateTime?
+  tacGiaId   String?
+  tacGia     User?     @relation(fields: [tacGiaId], references: [id], onDelete: SetNull)
+  trangThai  TrangThai @default(HIEN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([loai])
+}

@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --mau-toc: #7a1f1f;
+  --mau-dong: #b8860b;
+}
+
+body {
+  background-color: theme("colors.giay");
+  color: #2a2420;
+}
+
+/* Nét trang trí tiêu đề kiểu truyền thống */
+.tieu-de-trang {
+  font-family: theme("fontFamily.serif");
+}
+
+/* Đường nối cây gia phả */
+.cay-line {
+  border-color: theme("colors.dong.DEFAULT");
+}
