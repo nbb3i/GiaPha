@@ -32,13 +32,12 @@ export default async function QuanLyThanhVien() {
           </h1>
         </div>
         {suaDuoc && (
-          <button
-            disabled
-            title="Chức năng thêm sẽ có ở giai đoạn sau"
-            className="cursor-not-allowed rounded bg-toc/40 px-4 py-1.5 text-sm text-giay"
+          <Link
+            href="/admin/thanh-vien/moi"
+            className="rounded bg-toc px-4 py-1.5 text-sm text-giay hover:bg-toc-light"
           >
             + Thêm thành viên
-          </button>
+          </Link>
         )}
       </div>
 
@@ -50,6 +49,7 @@ export default async function QuanLyThanhVien() {
               <th className="px-4 py-2">Đời</th>
               <th className="px-4 py-2">Chức vụ</th>
               <th className="px-4 py-2">Hiển thị</th>
+              {suaDuoc && <th className="px-4 py-2"></th>}
             </tr>
           </thead>
           <tbody>
@@ -72,13 +72,23 @@ export default async function QuanLyThanhVien() {
                     {p.hienThi ? "Hiển thị" : "Ẩn"}
                   </span>
                 </td>
+                {suaDuoc && (
+                  <td className="px-4 py-2 text-right">
+                    <Link
+                      href={`/admin/thanh-vien/${p.id}`}
+                      className="text-sm text-dong hover:underline"
+                    >
+                      Sửa
+                    </Link>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       <p className="text-sm text-gray-400">
-        * Giai đoạn dựng khung: danh sách chỉ đọc. Form thêm/sửa/xoá sẽ bổ sung sau.
+        Hiển thị tối đa 300 thành viên đầu. Tổng {ds.length} bản ghi trong trang này.
       </p>
     </div>
   );

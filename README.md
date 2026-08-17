@@ -12,16 +12,18 @@ Con cháu xem gia phả công khai; quản trị viên đăng nhập để thêm
 - **NextAuth** (phân quyền 3 cấp: Khách / Biên tập / Admin)
 - Triển khai bằng **Docker Compose** trên **VPS Ubuntu**
 
-## Tính năng (giai đoạn dựng khung)
+## Tính năng
 
-| Công khai | Quản trị |
+| Công khai | Quản trị (phân quyền 3 cấp) |
 |---|---|
-| Trang chủ + thống kê | Đăng nhập, phân quyền |
+| Trang chủ + thống kê | Đăng nhập, đăng xuất |
 | Danh sách theo đời + tìm kiếm | Bảng điều khiển |
-| Chi tiết thành viên | Danh sách thành viên (đọc) |
-| Sơ đồ cây gia phả | Danh sách tài khoản (Admin) |
-| Lịch giỗ | *(Form thêm/sửa/xoá: giai đoạn sau)* |
-| Tin tức & sự kiện | |
+| Chi tiết thành viên (cha/mẹ/vợ-chồng/con) | **Thêm/sửa/xoá thành viên** (chọn cha/mẹ, đời) |
+| **Sơ đồ cây tương tác** (zoom/pan) | **Thêm/sửa/xoá tin tức** (nháp/hiển thị) |
+| Lịch giỗ | **Quản lý tài khoản** (tạo, đổi vai trò, đặt mật khẩu — Admin) |
+| Tin tức & sự kiện | Xoá dữ liệu chỉ dành cho Admin |
+
+**Dữ liệu thật:** 514 thành viên, 9 đời (dòng họ Nguyễn Bá — Trung Thành, Đại Lai).
 
 ## Chạy ở máy phát triển
 

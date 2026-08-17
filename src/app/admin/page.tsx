@@ -41,13 +41,15 @@ export default async function BangDieuKhien() {
         )}
       </div>
 
-      <section className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
-        <p className="font-medium">🚧 Khu vực quản trị đang trong giai đoạn dựng khung.</p>
-        <p className="mt-1">
-          Các trang thêm/sửa/xoá thành viên, tin tức và quản lý tài khoản sẽ được
-          bổ sung ở giai đoạn tiếp theo (xem lộ trình trong{" "}
-          <code>docs/THIET-KE.md</code>).
-        </p>
+      <section className="rounded-lg border border-dong/20 bg-white p-4 text-sm text-gray-600">
+        <p className="font-medium text-toc">Hướng dẫn nhanh</p>
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          <li><b>Thành viên</b>: thêm/sửa (Biên tập trở lên), xoá (Admin). Chọn cha/mẹ, đời, thứ tự khi thêm.</li>
+          <li><b>Tin tức</b>: đăng bài giỗ Tổ, họp họ, thông báo — có thể để nháp trước khi hiện.</li>
+          {coQuyenAdmin(vaiTro) && (
+            <li><b>Tài khoản</b>: tạo tài khoản, đổi vai trò, đặt lại mật khẩu, xoá.</li>
+          )}
+        </ul>
       </section>
     </div>
   );
