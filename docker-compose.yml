@@ -33,6 +33,22 @@ services:
     volumes:
       - uploads:/app/public/uploads
 
+  # Chạy 1 lần để đồng bộ schema / seed dữ liệu.
+  # Không tự chạy khi `docker compose up` (nhờ profile "tools").
+  # Gọi qua: docker compose run --rm migrate <lệnh>
+  migrate:
+    build:
+      context: .
+      target: tooling
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://giapha:giapha_password@db:5432/giapha?schema=public"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-Admin@12345}"
+
 volumes:
   pgdata:
   uploads:

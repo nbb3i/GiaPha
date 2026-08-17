@@ -15,6 +15,15 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate && npm run build
 
+# ---- Tooling (chạy migrate/seed; có đủ Prisma CLI + tsx) ----
+FROM base AS tooling
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json tsconfig.json ./
+COPY prisma ./prisma
+RUN npx prisma generate
+# Mặc định: đồng bộ schema rồi seed. deploy.sh sẽ override khi cần.
+CMD ["sh", "-c", "npx prisma db push && npm run db:seed"]
+
 # ---- Runner ----
 FROM base AS runner
 ENV NODE_ENV=production
@@ -25,6 +34,7 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 USER nextjs
 EXPOSE 3000
